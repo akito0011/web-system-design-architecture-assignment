@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Prenota Camera</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+
+<h2>Camere Disponibili (Dati dal DB)</h2>
+
+<table class="table table-striped table-hover align-middle">
+    <thead class="table-dark">
+    <tr>
+        <th>Numero</th>
+        <th>Capienza</th>
+        <th>Prezzo</th>
+        <th>Stato</th>
+        <th>Azione</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="camera : ${listaCamere}">
+        <td th:text="${camera.numero}">101</td>
+        <td th:text="${camera.capienza}">2 Persone</td>
+        <td th:text="${camera.prezzoBase} + ' €'">80.00 €</td>
+
+        <td>
+            <span th:if="${camera.stato.name() == 'LIBERA'}" class="badge bg-success">Libera</span>
+            <span th:if="${camera.stato.name() == 'OCCUPATA'}" class="badge bg-danger">Occupata</span>
+            <span th:if="${camera.stato.name() == 'DA_PULIRE'}" class="badge bg-warning text-dark">Da Pulire</span>
+        </td>
+
+        <td>
+            <div th:if="${camera.stato.name() == 'LIBERA'}">
+                <form th:action="@{/prenota}" method="post">
+                    <input type="hidden" name="idCamera" th:value="${camera.id}" />
+                    <button type="submit" class="btn btn-primary btn-sm">Prenota</button>
+                </form>
+            </div>
+
+            <div th:unless="${camera.stato.name() == 'LIBERA'}">
+                <button class="btn btn-secondary btn-sm" disabled>Non Disponibile</button>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

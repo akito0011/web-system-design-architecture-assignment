@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="ReportTassaSoggiorno">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="DataReport" type="xs:date"/>
+                <xs:element name="Versamenti" type="ListaVersamentiType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="ListaVersamentiType">
+        <xs:sequence>
+            <xs:element name="Pernottamento" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="Capogruppo" type="xs:string"/> <xs:element name="TotaleOspiti" type="xs:integer"/>
+                        <xs:element name="Esenzioni" type="EsenzioniType" minOccurs="0"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="EsenzioniType">
+        <xs:sequence>
+            <xs:element name="Esenzione" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="Tipo" type="xs:string"/> <xs:element name="Quantita" type="xs:integer"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Dettaglio Prenotazione</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark px-4 mb-4">
+    <a class="navbar-brand" href="#">Admin Panel</a>
+    <a th:href="@{/admin/dashboard}" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-arrow-left"></i> Torna alla Dashboard
+    </a>
+</nav>
+
+<div class="container pb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Dettaglio Prenotazione #<span th:text="${prenotazione.id}">10</span></h3>
+        <div>
+            <span th:if="${prenotazione.stato.name() == 'CONFERMATA'}" class="badge bg-warning text-dark fs-6">Confermata</span>
+            <span th:if="${prenotazione.stato.name() == 'IN_CORSO'}" class="badge bg-success fs-6">In Corso</span>
+            <span th:if="${prenotazione.stato.name() == 'TERMINATA'}" class="badge bg-secondary fs-6">Terminata</span>
+            <span th:if="${prenotazione.stato.name() == 'CANCELLATA'}" class="badge bg-danger fs-6">Cancellata</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Dati Soggiorno</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <strong>Struttura:</strong>
+                            <span th:text="${prenotazione.camera.struttura.nome}">Hotel</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <strong>Camera:</strong>
+                            <span>N° <strong th:text="${prenotazione.camera.numero}">101</strong></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <strong>Check-in:</strong>
+                            <span th:text="${prenotazione.dataCheckin}">2023-01-01</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <strong>Check-out:</strong>
+                            <span th:text="${prenotazione.dataCheckout}">2023-01-05</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <strong>Ospiti Previsti:</strong>
+                            <span th:text="${prenotazione.numOspiti}">2</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between bg-light">
+                            <strong>Prezzo Totale:</strong>
+                            <span class="fw-bold text-success" th:text="${prenotazione.prezzoPagato} + ' €'">200.00 €</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-person-circle"></i> Cliente Prenotante</h5>
+                </div>
+                <div class="card-body">
+                    <h5 th:text="${prenotazione.utente.nome} + ' ' + ${prenotazione.utente.cognome}">Mario Rossi</h5>
+                    <p class="text-muted"><i class="bi bi-envelope"></i> <span th:text="${prenotazione.utente.email}">email@test.com</span></p>
+
+                    <hr>
+                    <h6 class="text-muted small text-uppercase">Note Cliente:</h6>
+                    <div class="alert alert-light border"
+                         th:text="${prenotazione.noteCliente != null && !prenotazione.noteCliente.isEmpty() ? prenotazione.noteCliente : 'Nessuna nota presente.'}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="bi bi-people"></i> Ospiti Registrati (Check-in Online)</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0 align-middle">
+                <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Cognome</th>
+                    <th>Data Nascita</th>
+                    <th>Documento</th>
+                    <th>Esenzione Tassa</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="ospite : ${prenotazione.ospiti}">
+                    <td th:text="${ospite.nome}">Nome</td>
+                    <td th:text="${ospite.cognome}">Cognome</td>
+
+                    <td th:text="${ospite.dataNascita}">01/01/1990</td>
+
+                    <td>
+                        <span th:if="${ospite.tipoDoc != null}">
+                            <span th:text="${ospite.tipoDoc}">CI</span> - <span th:text="${ospite.numeroDoc}">AB123</span>
+                        </span>
+                        <span th:if="${ospite.tipoDoc == null}" class="text-muted fst-italic small">Non presente</span>
+                    </td>
+
+                    <td>
+                        <span th:if="${ospite.esenteTassa}" class="badge bg-info text-dark">SÌ (Esente)</span>
+                        <span th:if="${!ospite.esenteTassa}" class="badge bg-light text-dark border">NO</span>
+                    </td>
+                </tr>
+                <tr th:if="${prenotazione.ospiti == null || prenotazione.ospiti.isEmpty()}">
+                    <td colspan="5" class="text-center py-4 text-muted">
+                        <i class="bi bi-exclamation-circle fs-4 d-block mb-2"></i>
+                        Nessun ospite registrato ancora. Il Check-in non è stato effettuato.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+        <form th:if="${prenotazione.stato.name() == 'CONFERMATA'}"
+              th:action="@{/admin/cancella-prenotazione}" method="post">
+            <input type="hidden" name="idPrenotazione" th:value="${prenotazione.id}"/>
+            <button type="submit" class="btn btn-outline-danger"
+                    onclick="return confirm('Sei sicuro di voler cancellare?');">
+                <i class="bi bi-trash"></i> Cancella Prenotazione
+            </button>
+        </form>
+
+        <form th:if="${prenotazione.stato.name() == 'IN_CORSO'}"
+              th:action="@{/admin/conferma-checkout}" method="post">
+            <input type="hidden" name="idPrenotazione" th:value="${prenotazione.id}"/>
+            <button type="submit" class="btn btn-danger"
+                    onclick="return confirm('Confermi il Check-out forzato?');">
+                <i class="bi bi-box-arrow-right"></i> Forza Check-out
+            </button>
+        </form>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

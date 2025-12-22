@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="ReportQuestura">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="DataReport" type="xs:date"/>
+                <xs:element name="Struttura" type="xs:string"/>
+                <xs:element name="Ospiti" type="ListaOspitiType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="ListaOspitiType">
+        <xs:sequence>
+            <xs:element name="Gruppo" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="Capogruppo" type="CapogruppoType"/>
+                        <xs:element name="AltriOspiti" type="AltriOspitiType" minOccurs="0"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="CapogruppoType">
+        <xs:sequence>
+            <xs:element name="Nome" type="xs:string"/>
+            <xs:element name="Cognome" type="xs:string"/>
+            <xs:element name="Cittadinanza" type="xs:string"/>
+            <xs:element name="LuogoNascita" type="xs:string"/>
+            <xs:element name="DataNascita" type="xs:date"/>
+            <xs:element name="TipoDocumento" type="xs:string"/>
+            <xs:element name="NumeroDocumento" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="AltriOspitiType">
+        <xs:sequence>
+            <xs:element name="Ospite" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="Nome" type="xs:string"/>
+                        <xs:element name="Cognome" type="xs:string"/>
+                        <xs:element name="Cittadinanza" type="xs:string"/>
+                        <xs:element name="LuogoNascita" type="xs:string"/>
+                        <xs:element name="DataNascita" type="xs:date"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

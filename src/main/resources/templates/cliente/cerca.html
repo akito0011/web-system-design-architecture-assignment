@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Cerca Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark px-4 mb-5">
+    <a class="navbar-brand" href="#">Hotel Manager</a>
+    <a th:href="@{/cliente/dashboard}" class="btn btn-outline-light btn-sm">Torna alla Dashboard</a>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h3 class="mb-0"><i class="bi bi-search"></i> Prenota il tuo soggiorno</h3>
+                </div>
+                <div class="card-body p-4">
+
+                    <form th:action="@{/cliente/risultati}" th:object="${ricercaForm}" method="get">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Dove vuoi andare?</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                <input type="text" th:field="*{citta}" class="form-control" placeholder="Es. Palermo, Roma..."
+                                       th:classappend="${#fields.hasErrors('citta')} ? 'is-invalid' : ''">
+                                <div class="invalid-feedback" th:errors="*{citta}">Errore città</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Check-in</label>
+                                <input type="date" th:field="*{dataCheckin}" class="form-control"
+                                       th:classappend="${#fields.hasErrors('dataCheckin')} ? 'is-invalid' : ''">
+                                <div class="invalid-feedback" th:errors="*{dataCheckin}">Errore data</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Check-out</label>
+                                <input type="date" th:field="*{dataCheckout}" class="form-control"
+                                       th:classappend="${#fields.hasErrors('dataCheckout')} ? 'is-invalid' : ''">
+                                <div class="invalid-feedback" th:errors="*{dataCheckout}">Errore data</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Ospiti Totali</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-people"></i></span>
+                                    <input type="number" th:field="*{numOspiti}" class="form-control" min="1" max="10"
+                                           th:classappend="${#fields.hasErrors('numOspiti')} ? 'is-invalid' : ''">
+                                    <div class="invalid-feedback" th:errors="*{numOspiti}">Errore ospiti</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Di cui Esenti Tassa</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person-heart"></i></span>
+                                    <input type="number" th:field="*{ospitiEsenti}" class="form-control" min="0" max="10" value="0">
+                                </div>
+                                <div class="form-text text-muted" style="font-size: 0.8em;">
+                                    Minori di 12 anni o maggiori di 85 anni.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Cerca Disponibilità</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
