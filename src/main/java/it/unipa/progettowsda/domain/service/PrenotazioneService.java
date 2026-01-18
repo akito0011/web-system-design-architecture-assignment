@@ -33,12 +33,12 @@ public class PrenotazioneService {
     private static final BigDecimal TASSA_SOGGIORNO = new BigDecimal("2.00");
 
     public PrenotazioneService(PrenotazioneRepository prenotazioneRepo,
-                               CameraRepository cameraRepo,
-                               UtenteRepository utenteRepo,
-                               ServizioRepository servizioRepo,
-                               PrenotazioneServizioRepository prenServizioRepo,
-                               OspiteRepository ospiteRepo,
-                               StrutturaRepository strutturaRepo) {
+            CameraRepository cameraRepo,
+            UtenteRepository utenteRepo,
+            ServizioRepository servizioRepo,
+            PrenotazioneServizioRepository prenServizioRepo,
+            OspiteRepository ospiteRepo,
+            StrutturaRepository strutturaRepo) {
         this.prenotazioneRepo = prenotazioneRepo;
         this.cameraRepo = cameraRepo;
         this.utenteRepo = utenteRepo;
@@ -86,19 +86,22 @@ public class PrenotazioneService {
     // --- METODO CREA PRENOTAZIONE ---
     @Transactional
     public Prenotazione creaPrenotazione(Integer idUtente, Integer idCamera, LocalDate checkin, LocalDate checkout,
-                                         int ospitiTotali, int ospitiEsentiDichiarati, Map<Long, Integer> serviziMap) {
+            int ospitiTotali, int ospitiEsentiDichiarati, Map<Long, Integer> serviziMap) {
         Utente utente = utenteRepo.findById(idUtente).orElseThrow();
         Camera camera = cameraRepo.findById(idCamera).orElseThrow();
 
         // NOTA: Non cambiamo lo stato della camera qui.
-        // La camera potrebbe essere OCCUPATA da qualcun altro oggi, ma libera per le date future di questa prenotazione.
+        // La camera potrebbe essere OCCUPATA da qualcun altro oggi, ma libera per le
+        // date future di questa prenotazione.
 
         long notti = ChronoUnit.DAYS.between(checkin, checkout);
-        if (notti < 1) notti = 1;
+        if (notti < 1)
+            notti = 1;
 
         BigDecimal totale = camera.getPrezzoBase().multiply(BigDecimal.valueOf(notti));
         int paganti = Math.max(0, ospitiTotali - ospitiEsentiDichiarati);
-        BigDecimal costoTassa = TASSA_SOGGIORNO.multiply(BigDecimal.valueOf(paganti)).multiply(BigDecimal.valueOf(notti));
+        BigDecimal costoTassa = TASSA_SOGGIORNO.multiply(BigDecimal.valueOf(paganti))
+                .multiply(BigDecimal.valueOf(notti));
         totale = totale.add(costoTassa);
 
         Prenotazione p = new Prenotazione();
@@ -171,10 +174,12 @@ public class PrenotazioneService {
         if (contatoreEsentiReali != p.getNumOspitiEsentiDichiarati()) {
             long notti = Math.max(1, ChronoUnit.DAYS.between(p.getDataCheckin(), p.getDataCheckout()));
             int pagantiDichiarati = Math.max(0, p.getNumOspiti() - p.getNumOspitiEsentiDichiarati());
-            BigDecimal tassaVecchia = TASSA_SOGGIORNO.multiply(BigDecimal.valueOf(pagantiDichiarati)).multiply(BigDecimal.valueOf(notti));
+            BigDecimal tassaVecchia = TASSA_SOGGIORNO.multiply(BigDecimal.valueOf(pagantiDichiarati))
+                    .multiply(BigDecimal.valueOf(notti));
 
             int pagantiReali = Math.max(0, p.getNumOspiti() - contatoreEsentiReali);
-            BigDecimal tassaNuova = TASSA_SOGGIORNO.multiply(BigDecimal.valueOf(pagantiReali)).multiply(BigDecimal.valueOf(notti));
+            BigDecimal tassaNuova = TASSA_SOGGIORNO.multiply(BigDecimal.valueOf(pagantiReali))
+                    .multiply(BigDecimal.valueOf(notti));
 
             p.setPrezzoPagato(p.getPrezzoPagato().subtract(tassaVecchia).add(tassaNuova));
             p.setNumOspitiEsentiDichiarati(contatoreEsentiReali);
@@ -207,21 +212,25 @@ public class PrenotazioneService {
     @Transactional
     public void cancellaPrenotazione(Integer id) {
         Prenotazione p = prenotazioneRepo.findById(id).orElseThrow();
-        if (p.getStato() == StatoPrenotazione.TERMINATA) throw new RuntimeException("Già terminata");
+        if (p.getStato() == StatoPrenotazione.TERMINATA)
+            throw new RuntimeException("Già terminata");
 
         // MODIFICA IMPORTANTE:
         // Se la prenotazione è CONFERMATA (futura), non tocchiamo la camera.
-        // Se fosse IN_CORSO (cioè l'ospite è già dentro), allora sì, dovremmo liberarla o metterla da pulire.
+        // Se fosse IN_CORSO (cioè l'ospite è già dentro), allora sì, dovremmo liberarla
+        // o metterla da pulire.
 
         if (p.getStato() == StatoPrenotazione.IN_CORSO) {
-            // Se stiamo cancellando una prenotazione mentre l'ospite è dentro (es. cacciato via)
+            // Se stiamo cancellando una prenotazione mentre l'ospite è dentro (es. Cacciato
+            // via)
             Camera c = p.getCamera();
             c.setStato(StatoCamera.DA_PULIRE);
             cameraRepo.save(c);
         }
 
         // Se è CONFERMATA (non ancora arrivato), non facciamo nulla sulla Camera.
-        // La disponibilità temporale si libera automaticamente cambiando lo stato della prenotazione.
+        // La disponibilità temporale si libera automaticamente cambiando lo stato della
+        // prenotazione.
 
         p.setStato(StatoPrenotazione.CANCELLATA);
         prenotazioneRepo.save(p);
@@ -240,20 +249,33 @@ public class PrenotazioneService {
             throw new RuntimeException("Non è possibile cancellare una prenotazione già in corso o terminata.");
         }
 
-        // Usiamo il metodo admin. Essendo stato CONFERMATA, la camera non verrà toccata fisicamente,
-        // ma la prenotazione diventerà CANCELLATA, liberando lo slot temporale per le ricerche.
+        // Usiamo il metodo admin. Essendo stato CONFERMATA, la camera non verrà toccata
+        // fisicamente,
+        // ma la prenotazione diventerà CANCELLATA, liberando lo slot temporale per le
+        // ricerche.
         cancellaPrenotazione(idPrenotazione);
     }
 
     // --- QUERY REPORT E DASHBOARD ---
-    public List<Prenotazione> getArriviDiOggi() { return prenotazioneRepo.findByDataCheckinAndStato(LocalDate.now(), StatoPrenotazione.CONFERMATA); }
-    public List<Prenotazione> getPartenzeDiOggi() { return prenotazioneRepo.findByDataCheckoutAndStato(LocalDate.now(), StatoPrenotazione.IN_CORSO); }
-    public List<Prenotazione> getOspitiInCasa() { return prenotazioneRepo.findByStato(StatoPrenotazione.IN_CORSO); }
-    public List<Prenotazione> getTutteLePrenotazioni() { return prenotazioneRepo.findAll(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "dataCheckin")); }
+    public List<Prenotazione> getArriviDiOggi() {
+        return prenotazioneRepo.findByDataCheckinAndStato(LocalDate.now(), StatoPrenotazione.CONFERMATA);
+    }
 
+    public List<Prenotazione> getPartenzeDiOggi() {
+        return prenotazioneRepo.findByDataCheckoutAndStato(LocalDate.now(), StatoPrenotazione.IN_CORSO);
+    }
 
-    // --- GENERAZIONE REPORT XML (INVARIATO) ---
-    public String generaReportXmlGiornaliero() {
+    public List<Prenotazione> getOspitiInCasa() {
+        return prenotazioneRepo.findByStato(StatoPrenotazione.IN_CORSO);
+    }
+
+    public List<Prenotazione> getTutteLePrenotazioni() {
+        return prenotazioneRepo.findAll(org.springframework.data.domain.Sort
+                .by(org.springframework.data.domain.Sort.Direction.DESC, "dataCheckin"));
+    }
+
+    // --- GENERAZIONE REPORT XML QUESTURA ---
+    public String generaReportQuestura() {
         LocalDate oggi = LocalDate.now();
         List<Prenotazione> tutte = prenotazioneRepo.findAll();
 
@@ -267,84 +289,133 @@ public class PrenotazioneService {
 
         StringBuilder xml = new StringBuilder();
         xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        xml.append("<ReportGiornaliero data=\"").append(oggi).append("\">\n");
+        xml.append("<ReportQuestura>\n");
+        xml.append("  <DataReport>").append(oggi).append("</DataReport>\n");
 
-        if (mappaStrutture.isEmpty()) {
-            xml.append("  \n");
-        } else {
-            for (Map.Entry<String, List<Prenotazione>> entry : mappaStrutture.entrySet()) {
-                String nomeStruttura = entry.getKey();
-                List<Prenotazione> prenotazioniStruttura = entry.getValue();
+        for (Map.Entry<String, List<Prenotazione>> entry : mappaStrutture.entrySet()) {
+            String nomeStruttura = entry.getKey();
+            List<Prenotazione> prenotazioniStruttura = entry.getValue();
 
-                xml.append("  <Struttura nome=\"").append(nomeStruttura).append("\">\n");
+            xml.append("  <Struttura>").append(nomeStruttura).append("</Struttura>\n");
+            xml.append("  <Ospiti>\n");
 
-                for (Prenotazione p : prenotazioniStruttura) {
-                    xml.append("    <Prenotazione id=\"").append(p.getId()).append("\">\n");
-                    xml.append("      <Camera>").append(p.getCamera().getNumero()).append("</Camera>\n");
-                    xml.append("      <StatoCorrente>").append(p.getStato()).append("</StatoCorrente>\n");
+            for (Prenotazione p : prenotazioniStruttura) {
+                List<Ospite> ospiti = p.getOspiti();
+                if (ospiti != null && !ospiti.isEmpty()) {
+                    xml.append("    <Gruppo>\n");
 
-                    xml.append("      <DatiQuestura>\n");
-                    List<Ospite> ospiti = p.getOspiti();
-                    if (ospiti != null && !ospiti.isEmpty()) {
-                        for (int i = 0; i < ospiti.size(); i++) {
+                    // Capogruppo (primo ospite)
+                    Ospite capogruppo = ospiti.get(0);
+                    xml.append("      <Capogruppo>\n");
+                    xml.append("        <Nome>").append(capogruppo.getNome()).append("</Nome>\n");
+                    xml.append("        <Cognome>").append(capogruppo.getCognome()).append("</Cognome>\n");
+                    xml.append("        <Cittadinanza>")
+                            .append(capogruppo.getCittadinanza() != null ? capogruppo.getCittadinanza() : "N.D.")
+                            .append("</Cittadinanza>\n");
+                    xml.append("        <LuogoNascita>")
+                            .append(capogruppo.getLuogoNascita() != null ? capogruppo.getLuogoNascita() : "N.D.")
+                            .append("</LuogoNascita>\n");
+                    xml.append("        <DataNascita>").append(capogruppo.getDataNascita()).append("</DataNascita>\n");
+                    xml.append("        <TipoDocumento>")
+                            .append(capogruppo.getTipoDoc() != null ? capogruppo.getTipoDoc() : "N.D.")
+                            .append("</TipoDocumento>\n");
+                    xml.append("        <NumeroDocumento>")
+                            .append(capogruppo.getNumeroDoc() != null ? capogruppo.getNumeroDoc() : "N.D.")
+                            .append("</NumeroDocumento>\n");
+                    xml.append("      </Capogruppo>\n");
+
+                    // Altri ospiti
+                    if (ospiti.size() > 1) {
+                        xml.append("      <AltriOspiti>\n");
+                        for (int i = 1; i < ospiti.size(); i++) {
                             Ospite o = ospiti.get(i);
-                            boolean isCapogruppo = (i == 0);
-
-                            xml.append("        <Soggetto ruolo=\"").append(isCapogruppo ? "Capogruppo" : "Ospite").append("\">\n");
+                            xml.append("        <Ospite>\n");
                             xml.append("          <Nome>").append(o.getNome()).append("</Nome>\n");
                             xml.append("          <Cognome>").append(o.getCognome()).append("</Cognome>\n");
-                            xml.append("          <Cittadinanza>").append(o.getCittadinanza() != null ? o.getCittadinanza() : "N.D.").append("</Cittadinanza>\n");
-                            xml.append("          <LuogoNascita>").append(o.getLuogoNascita() != null ? o.getLuogoNascita() : "N.D.").append("</LuogoNascita>\n");
+                            xml.append("          <Cittadinanza>")
+                                    .append(o.getCittadinanza() != null ? o.getCittadinanza() : "N.D.")
+                                    .append("</Cittadinanza>\n");
+                            xml.append("          <LuogoNascita>")
+                                    .append(o.getLuogoNascita() != null ? o.getLuogoNascita() : "N.D.")
+                                    .append("</LuogoNascita>\n");
                             xml.append("          <DataNascita>").append(o.getDataNascita()).append("</DataNascita>\n");
-
-                            if (isCapogruppo && o.getTipoDoc() != null) {
-                                xml.append("          <Documento>\n");
-                                xml.append("            <Tipo>").append(o.getTipoDoc()).append("</Tipo>\n");
-                                xml.append("            <Numero>").append(o.getNumeroDoc()).append("</Numero>\n");
-                                xml.append("          </Documento>\n");
-                            }
-                            xml.append("        </Soggetto>\n");
+                            xml.append("        </Ospite>\n");
                         }
-                    } else {
-                        xml.append("        \n");
+                        xml.append("      </AltriOspiti>\n");
                     }
-                    xml.append("      </DatiQuestura>\n");
 
-                    xml.append("      <DatiTassaSoggiorno>\n");
-                    String capogruppoNome = (p.getUtente() != null) ? p.getUtente().getNome() + " " + p.getUtente().getCognome() : "N.D.";
-                    xml.append("        <Capogruppo>").append(capogruppoNome).append("</Capogruppo>\n");
-                    xml.append("        <OspitiTotali>").append(p.getNumOspiti()).append("</OspitiTotali>\n");
-
-                    int numEsenzioni = 0;
-                    List<String> dettagliEsenzione = new ArrayList<>();
-                    if (ospiti != null) {
-                        for (Ospite o : ospiti) {
-                            if (Boolean.TRUE.equals(o.getEsenteTassa())) {
-                                numEsenzioni++;
-                                if (o.getDataNascita() != null) {
-                                    int eta = Period.between(o.getDataNascita(), oggi).getYears();
-                                    if (eta < 12) dettagliEsenzione.add("Minore 12 anni");
-                                    else if (eta > 85) dettagliEsenzione.add("Over 85");
-                                    else dettagliEsenzione.add("Altro");
-                                } else {
-                                    dettagliEsenzione.add("Generica");
-                                }
-                            }
-                        }
-                    }
-                    xml.append("        <NumeroEsenzioni>").append(numEsenzioni).append("</NumeroEsenzioni>\n");
-                    if (numEsenzioni > 0) {
-                        xml.append("        <DettaglioEsenzioni>").append(String.join(", ", dettagliEsenzione)).append("</DettaglioEsenzioni>\n");
-                    }
-                    xml.append("      </DatiTassaSoggiorno>\n");
-
-                    xml.append("    </Prenotazione>\n");
+                    xml.append("    </Gruppo>\n");
                 }
-                xml.append("  </Struttura>\n");
             }
+            xml.append("  </Ospiti>\n");
         }
 
-        xml.append("</ReportGiornaliero>");
+        xml.append("</ReportQuestura>");
+        return xml.toString();
+    }
+
+    // --- GENERAZIONE REPORT XML TASSA SOGGIORNO ---
+    public String generaReportTassaSoggiorno() {
+        LocalDate oggi = LocalDate.now();
+        List<Prenotazione> tutte = prenotazioneRepo.findAll();
+
+        List<Prenotazione> lista = tutte.stream()
+                .filter(p -> p.getStato() != StatoPrenotazione.CANCELLATA)
+                .filter(p -> !p.getDataCheckin().isAfter(oggi) && !p.getDataCheckout().isBefore(oggi))
+                .collect(Collectors.toList());
+
+        StringBuilder xml = new StringBuilder();
+        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        xml.append("<ReportTassaSoggiorno>\n");
+        xml.append("  <DataReport>").append(oggi).append("</DataReport>\n");
+        xml.append("  <Versamenti>\n");
+
+        for (Prenotazione p : lista) {
+            xml.append("    <Pernottamento>\n");
+
+            // Nome e cognome del capogruppo
+            String capogruppoNome = (p.getUtente() != null)
+                    ? p.getUtente().getNome() + " " + p.getUtente().getCognome()
+                    : "N.D.";
+            xml.append("      <Capogruppo>").append(capogruppoNome).append("</Capogruppo>\n");
+            xml.append("      <TotaleOspiti>").append(p.getNumOspiti()).append("</TotaleOspiti>\n");
+
+            // Esenzioni raggruppate per tipo
+            List<Ospite> ospiti = p.getOspiti();
+            Map<String, Integer> esenzioniPerTipo = new java.util.HashMap<>();
+
+            if (ospiti != null) {
+                for (Ospite o : ospiti) {
+                    if (Boolean.TRUE.equals(o.getEsenteTassa())) {
+                        String tipoEsenzione = "Altro";
+                        if (o.getDataNascita() != null) {
+                            int eta = Period.between(o.getDataNascita(), oggi).getYears();
+                            if (eta < 12)
+                                tipoEsenzione = "Minore 12 anni";
+                            else if (eta > 85)
+                                tipoEsenzione = "Over 85";
+                        }
+                        esenzioniPerTipo.merge(tipoEsenzione, 1, Integer::sum);
+                    }
+                }
+            }
+
+            if (!esenzioniPerTipo.isEmpty()) {
+                xml.append("      <Esenzioni>\n");
+                for (Map.Entry<String, Integer> e : esenzioniPerTipo.entrySet()) {
+                    xml.append("        <Esenzione>\n");
+                    xml.append("          <Tipo>").append(e.getKey()).append("</Tipo>\n");
+                    xml.append("          <Quantita>").append(e.getValue()).append("</Quantita>\n");
+                    xml.append("        </Esenzione>\n");
+                }
+                xml.append("      </Esenzioni>\n");
+            }
+
+            xml.append("    </Pernottamento>\n");
+        }
+
+        xml.append("  </Versamenti>\n");
+        xml.append("</ReportTassaSoggiorno>");
         return xml.toString();
     }
 }

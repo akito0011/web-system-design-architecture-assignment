@@ -15,18 +15,18 @@ public interface PrenotazioneRepository extends JpaRepository<Prenotazione, Inte
     // Trova le prenotazioni di un utente specifico
     List<Prenotazione> findByUtenteId(Integer idUtente);
 
-    // DASHBOARD GESTORE
+    //DASHBOARD GESTORE
 
-    // 1. Arrivi di oggi (Data Checkin = Oggi AND Stato = CONFERMATA)
+    // Arrivi di oggi: (Data Checkin = Oggi AND Stato = CONFERMATA)
     List<Prenotazione> findByDataCheckinAndStato(LocalDate dataCheckin, StatoPrenotazione stato);
 
-    // 2. Partenze di oggi (Data Checkout = Oggi AND Stato = IN_CORSO)
+    //Partenze di oggi: (Data Checkout = Oggi AND Stato = IN_CORSO)
     List<Prenotazione> findByDataCheckoutAndStato(LocalDate dataCheckout, StatoPrenotazione stato);
 
-    // 3. Ospiti attualmente in casa (Stato = IN_CORSO)
+    //Ospiti attualmente in struttura: (Stato = IN_CORSO)
     List<Prenotazione> findByStato(StatoPrenotazione stato);
 
-    // 4. Per il report XML della giornata (Arrivi previsti + Arrivi già check-innati oggi)
+    // Per il report XML della giornata: (Arrivi previsti + Arrivi già check-innati oggi)
     // Questa query prende tutte le prenotazioni che hanno checkin oggi, indipendentemente dallo stato (purché non cancellate)
     @Query("SELECT p FROM Prenotazione p WHERE p.dataCheckin = :data AND p.stato != 'CANCELLATA'")
     List<Prenotazione> findAllByDataCheckin(LocalDate data);

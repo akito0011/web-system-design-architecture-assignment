@@ -25,7 +25,6 @@ public class Servizio {
     @ManyToMany(mappedBy = "serviziDisponibili")
     private Set<Struttura> strutture = new HashSet<>();
 
-    // --- COSTRUTTORI ---
 
     public Servizio() {
     }
@@ -35,7 +34,7 @@ public class Servizio {
         this.prezzo = prezzo;
     }
 
-    // --- GETTER E SETTER ---
+    // GETTER E SETTER
 
     public Integer getId() { return id; }
 

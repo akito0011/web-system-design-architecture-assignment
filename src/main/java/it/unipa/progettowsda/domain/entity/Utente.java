@@ -22,13 +22,11 @@ public class Utente {
     @Column(length = 100)
     private String email;
 
-    // Importante: Definisci l'Enum Ruolo come abbiamo visto prima
     @Enumerated(EnumType.STRING) //da jakarta.persistence prendo la libreria EnumType
     @Column(nullable = false)
     private Ruolo ruolo;
 
-    // --- COSTRUTTORI ---
-    //default
+
     public Utente() {
     }
     //costruttore completo

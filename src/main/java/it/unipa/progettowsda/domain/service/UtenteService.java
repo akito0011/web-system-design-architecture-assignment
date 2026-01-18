@@ -15,13 +15,10 @@ public class UtenteService {
     private final UtenteRepository utenteRepo;
     private final PasswordEncoder passwordEncoder;
 
-    // Ho corretto 'passwordEndcoder' in 'passwordEncoder'
     public UtenteService(UtenteRepository utenteRepo, PasswordEncoder passwordEncoder) {
         this.utenteRepo = utenteRepo;
         this.passwordEncoder = passwordEncoder;
     }
-
-    // --- METODI ESISTENTI ---
 
     public Utente registraCliente(String nome, String cognome, String email, String password) {
         if (utenteRepo.existsByEmail(email)) {
@@ -46,7 +43,7 @@ public class UtenteService {
                 .orElseThrow(() -> new RuntimeException("Utente non trovato con ID: " + id));
     }
 
-    // --- NUOVI METODI PER GESTIONE STAFF (Quelli che mancavano) ---
+    // --- NUOVI METODI PER GESTIONE STAFF ---
 
     public List<Utente> getTuttoLoStaff() {
         return utenteRepo.findByRuolo(Ruolo.STAFF);

@@ -48,7 +48,7 @@ public class Prenotazione {
     @Column(name = "num_ospiti_esenti_dichiarati", nullable = false)
     private Integer numOspitiEsentiDichiarati = 0;
 
-    // Costruttori, Getter e Setter...
+
 
     public Integer getId() {
         return id;

@@ -1,178 +1,289 @@
 <!DOCTYPE html>
 <html lang="it" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Gestione Domotica</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; padding: 20px; text-align: center; }
-        .main-container { max-width: 900px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #c0392b;
+            --light: #f8f9fa;
+        }
 
-        /* Stile Card - IDENTICO A PRIMA */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .navbar {
+            background-color: var(--primary) !important;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            border-color: var(--success);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .value-display {
+            font-size: 3rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
         .device-card {
-            background: white;
-            border: 1px solid #e1e4e8;
-            padding: 25px;
-            border-radius: 12px;
-            width: 400px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
         }
 
-        h2 { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; color: #333; display: inline-block; }
-
-        /* Display Valori */
-        .value-display { font-size: 2.5em; font-weight: bold; margin: 20px 0; color: #2c3e50; }
-        .sub-text { color: #6c757d; margin-bottom: 20px; font-size: 0.9em; }
-
-        /* Pulsanti */
-        .actions-row { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
-
-        button { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 500; transition: all 0.2s; }
-
-        /* Colori Bottoni Azione (Blu) */
-        .btn-action { background-color: #007bff; color: white; }
-        .btn-action:hover { background-color: #0056b3; transform: translateY(-1px); }
-
-        /* Colori Bottoni Modalità (Grigio chiaro default) */
-        .btn-mode { background-color: #e9ecef; color: #495057; border: 1px solid #ced4da; }
-        .btn-mode:hover { background-color: #dee2e6; }
-
-        /* Stati Attivi Modalità */
-        .btn-mode.active-OFF { background-color: #6c757d; color: white; border-color: #6c757d; }
-        .btn-mode.active-COOL { background-color: #17a2b8; color: white; border-color: #17a2b8; }
-        .btn-mode.active-HEAT { background-color: #dc3545; color: white; border-color: #dc3545; }
-
-        /* Alert Messaggi */
-        .alert-box {
-            background-color: #f8d7da; color: #721c24;
-            padding: 15px; border-radius: 8px; margin-bottom: 30px;
-            border: 1px solid #f5c6cb; max-width: 820px; margin-left: auto; margin-right: auto;
-        }
-        .alert-info {
-            background-color: #cce5ff; color: #004085; border-color: #b8daff;
+        .device-card:hover {
+            transform: translateY(-2px);
         }
 
-        /* Stile Tasto Indietro */
-        .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            text-decoration: none;
+        .btn-mode {
+            min-width: 80px;
+        }
+
+        .btn-mode.active-OFF {
             background-color: #6c757d;
+            border-color: #6c757d;
             color: white;
-            padding: 10px 15px;
-            border-radius: 6px;
-            font-weight: 500;
         }
-        .back-btn:hover { background-color: #5a6268; }
 
-        /* NUOVO: Stile per le Luci (coerente con il resto) */
-        .btn-light-on { background-color: #ffc107; color: #212529; border: 1px solid #ffc107; } /* Giallo */
-        .btn-light-off { background-color: #343a40; color: white; border: 1px solid #343a40; } /* Scuro */
+        .btn-mode.active-COOL {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
 
+        .btn-mode.active-HEAT {
+            background-color: var(--danger);
+            border-color: var(--danger);
+            color: white;
+        }
+
+        h4 {
+            color: var(--primary);
+        }
     </style>
 </head>
-<body>
 
-<a th:href="@{/cliente/dashboard}" class="back-btn">⬅ Torna alla Dashboard</a>
+<body class="bg-light">
 
-<h1 style="margin-bottom: 40px; color: #333;">Pannello Domotica</h1>
-
-<div th:if="${errorMessage}" class="alert-box">
-    <span th:text="${errorMessage}">Errore</span>
-</div>
-<div th:if="${erroreGenerale}" class="alert-box alert-info">
-    <span th:text="${erroreGenerale}">Info</span>
-</div>
-
-<div th:if="${tapparella == null and termostato == null and (listaLuci == null or listaLuci.isEmpty())}"
-     class="alert-box alert-info" style="max-width: 600px;">
-    <h3>⚠ Nessun dispositivo trovato</h3>
-    <p>In questa camera non ci sono dispositivi domotici configurati.</p>
-</div>
-
-
-<div class="main-container">
-
-    <div class="device-card" th:if="${tapparella != null}">
-        <h2>Tapparella</h2>
-        <div class="value-display">
-            <span th:text="${tapparella.livello}">0</span>%
-        </div>
-        <p class="sub-text">Percentuale Apertura</p>
-
-        <div class="actions-row">
-            <form th:action="@{/cliente/domotica/{id}/tapparelle/regola(id=${idPrenotazione})}" method="post">
-                <input type="hidden" name="azione" value="INCREMENTA">
-                <button type="submit" class="btn-action">Sali</button>
-            </form>
-
-            <form th:action="@{/cliente/domotica/{id}/tapparelle/regola(id=${idPrenotazione})}" method="post">
-                <input type="hidden" name="azione" value="DECREMENTA">
-                <button type="submit" class="btn-action">Scendi</button>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+        <a class="navbar-brand" href="#">Hotel Manager</a>
+        <div class="ms-auto d-flex align-items-center text-white gap-3">
+            <a th:href="@{/cliente/dashboard}" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left"></i> Torna alla Dashboard
+            </a>
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <button class="btn btn-outline-danger btn-sm">Esci</button>
             </form>
         </div>
+    </nav>
+
+    <div class="container py-5">
+
+        <div class="text-center mb-5">
+            <h1 class="fw-bold" style="color: var(--primary);">
+                <i class="bi bi-house-gear-fill"></i> Pannello Domotica
+            </h1>
+            <p class="text-muted">Gestisci i dispositivi della tua camera</p>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span th:text="${errorMessage}">Errore</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${erroreGenerale}" class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            <span th:text="${erroreGenerale}">Info</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${tapparella == null and termostato == null and (listaLuci == null or listaLuci.isEmpty())}"
+            class="alert alert-warning text-center py-4">
+            <h4><i class="bi bi-exclamation-triangle"></i> Nessun dispositivo trovato</h4>
+            <p class="mb-0">In questa camera non ci sono dispositivi domotici configurati.</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+
+            <!-- TAPPARELLA -->
+            <div class="col-md-6 col-lg-4" th:if="${tapparella != null}">
+                <div class="card device-card h-100">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h5 class="mb-0"><i class="bi bi-blinds"></i> Tapparella</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="value-display my-4">
+                            <span th:text="${tapparella.livello}">0</span><small>%</small>
+                        </div>
+                        <p class="text-muted mb-4">Percentuale Apertura</p>
+
+                        <div class="d-flex justify-content-center gap-3">
+                            <form th:action="@{/cliente/domotica/{id}/tapparelle/regola(id=${idPrenotazione})}"
+                                method="post">
+                                <input type="hidden" name="azione" value="INCREMENTA">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-arrow-up"></i> Apri
+                                </button>
+                            </form>
+
+                            <form th:action="@{/cliente/domotica/{id}/tapparelle/regola(id=${idPrenotazione})}"
+                                method="post">
+                                <input type="hidden" name="azione" value="DECREMENTA">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-arrow-down"></i> Chiudi
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TERMOSTATO -->
+            <div class="col-md-6 col-lg-4" th:if="${termostato != null}">
+                <div class="card device-card h-100">
+                    <div class="card-header bg-success text-white text-center">
+                        <h5 class="mb-0"><i class="bi bi-thermometer-half"></i> Termostato</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="value-display my-4">
+                            <span th:text="${termostato.temperatura}">20.0</span><small>°C</small>
+                        </div>
+                        <p class="text-muted mb-3">Temperatura Target</p>
+
+                        <!-- Modalità -->
+                        <div class="btn-group mb-4" role="group">
+                            <form th:action="@{/cliente/domotica/{id}/termostati/modalita(id=${idPrenotazione})}"
+                                method="post" style="display: contents;">
+                                <input type="hidden" name="modalita" value="OFF">
+                                <button type="submit" class="btn btn-outline-secondary btn-mode"
+                                    th:classappend="${termostato.modalita.name() == 'OFF'} ? 'active-OFF'">
+                                    <i class="bi bi-power"></i> OFF
+                                </button>
+                            </form>
+
+                            <form th:action="@{/cliente/domotica/{id}/termostati/modalita(id=${idPrenotazione})}"
+                                method="post" style="display: contents;">
+                                <input type="hidden" name="modalita" value="COOL">
+                                <button type="submit" class="btn btn-outline-secondary btn-mode"
+                                    th:classappend="${termostato.modalita.name() == 'COOL'} ? 'active-COOL'">
+                                    <i class="bi bi-snow"></i> Freddo
+                                </button>
+                            </form>
+
+                            <form th:action="@{/cliente/domotica/{id}/termostati/modalita(id=${idPrenotazione})}"
+                                method="post" style="display: contents;">
+                                <input type="hidden" name="modalita" value="HEAT">
+                                <button type="submit" class="btn btn-outline-secondary btn-mode"
+                                    th:classappend="${termostato.modalita.name() == 'HEAT'} ? 'active-HEAT'">
+                                    <i class="bi bi-fire"></i> Caldo
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Temperatura -->
+                        <div class="d-flex justify-content-center gap-3">
+                            <form th:action="@{/cliente/domotica/{id}/termostati/regola(id=${idPrenotazione})}"
+                                method="post">
+                                <input type="hidden" name="azione" value="INCREMENTA">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </form>
+
+                            <form th:action="@{/cliente/domotica/{id}/termostati/regola(id=${idPrenotazione})}"
+                                method="post">
+                                <input type="hidden" name="azione" value="DECREMENTA">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi bi-dash-lg"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LUCI -->
+            <div class="col-md-6 col-lg-4" th:each="luce : ${listaLuci}">
+                <div class="card device-card h-100">
+                    <div class="card-header text-white text-center"
+                        th:classappend="${luce.stato.name() == 'ON'} ? 'bg-warning' : 'bg-secondary'">
+                        <h5 class="mb-0">
+                            <i class="bi"
+                                th:classappend="${luce.stato.name() == 'ON'} ? 'bi-lightbulb-fill' : 'bi-lightbulb'"></i>
+                            <span th:text="${luce.nome}">Luce</span>
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="value-display my-4">
+                            <span th:if="${luce.stato.name() == 'ON'}" style="color: #ffc107;">
+                                <i class="bi bi-sun-fill"></i> ON
+                            </span>
+                            <span th:if="${luce.stato.name() == 'OFF'}" style="color: #6c757d;">
+                                <i class="bi bi-moon-fill"></i> OFF
+                            </span>
+                        </div>
+                        <p class="text-muted mb-4">Stato Luce</p>
+
+                        <form th:action="@{/cliente/domotica/{id}/luci/switch(id=${idPrenotazione})}" method="post">
+                            <input type="hidden" name="idLuce" th:value="${luce.id}">
+                            <button type="submit" class="btn btn-lg w-100"
+                                th:classappend="${luce.stato.name() == 'ON'} ? 'btn-secondary' : 'btn-warning'">
+                                <i class="bi"
+                                    th:classappend="${luce.stato.name() == 'ON'} ? 'bi-toggle-on' : 'bi-toggle-off'"></i>
+                                <span th:text="${luce.stato.name() == 'ON'} ? 'SPEGNI' : 'ACCENDI'">Azione</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Pulsante Torna indietro (mobile friendly) -->
+        <div class="text-center mt-5">
+            <a th:href="@{/cliente/dashboard}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-arrow-left-circle"></i> Torna alla Dashboard
+            </a>
+        </div>
+
     </div>
 
-    <div class="device-card" th:if="${termostato != null}">
-        <h2>Termostato</h2>
-        <div class="value-display">
-            <span th:text="${termostato.temperatura}">20.0</span>°C
-        </div>
-        <p class="sub-text">Temperatura Target</p>
-
-        <div class="actions-row" style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 20px;">
-            <form th:action="@{/cliente/domotica/{id}/termostati/modalita(id=${idPrenotazione})}" method="post">
-                <input type="hidden" name="modalita" value="OFF">
-                <button type="submit" class="btn-mode"
-                        th:classappend="${termostato.modalita.name() == 'OFF'} ? 'active-OFF'">OFF</button>
-            </form>
-
-            <form th:action="@{/cliente/domotica/{id}/termostati/modalita(id=${idPrenotazione})}" method="post">
-                <input type="hidden" name="modalita" value="COOL">
-                <button type="submit" class="btn-mode"
-                        th:classappend="${termostato.modalita.name() == 'COOL'} ? 'active-COOL'">Freddo</button>
-            </form>
-
-            <form th:action="@{/cliente/domotica/{id}/termostati/modalita(id=${idPrenotazione})}" method="post">
-                <input type="hidden" name="modalita" value="HEAT">
-                <button type="submit" class="btn-mode"
-                        th:classappend="${termostato.modalita.name() == 'HEAT'} ? 'active-HEAT'">Caldo</button>
-            </form>
-        </div>
-
-        <div class="actions-row">
-            <form th:action="@{/cliente/domotica/{id}/termostati/regola(id=${idPrenotazione})}" method="post">
-                <input type="hidden" name="azione" value="INCREMENTA">
-                <button type="submit" class="btn-action">Aumenta</button>
-            </form>
-
-            <form th:action="@{/cliente/domotica/{id}/termostati/regola(id=${idPrenotazione})}" method="post">
-                <input type="hidden" name="azione" value="DECREMENTA">
-                <button type="submit" class="btn-action">Diminuisci</button>
-            </form>
-        </div>
-    </div>
-
-    <div class="device-card" th:each="luce : ${listaLuci}">
-        <h2 th:text="${luce.nome}">Luce</h2> <div class="value-display">
-        <span th:if="${luce.stato.name() == 'ON'}" style="color: #ffc107;">ON</span>
-        <span th:if="${luce.stato.name() == 'OFF'}" style="color: #6c757d;">OFF</span>
-    </div>
-        <p class="sub-text">Interruttore</p>
-
-        <div class="actions-row">
-            <form th:action="@{/cliente/domotica/{id}/luci/switch(id=${idPrenotazione})}" method="post">
-                <input type="hidden" name="idLuce" th:value="${luce.id}">
-
-                <button type="submit" style="width: 100%;"
-                        th:class="${luce.stato.name() == 'ON'} ? 'btn-light-off' : 'btn-light-on'">
-                    <span th:text="${luce.stato.name() == 'ON'} ? 'SPEGNI' : 'ACCENDI'">Azione</span>
-                </button>
-            </form>
-        </div>
-    </div>
-
-</div>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

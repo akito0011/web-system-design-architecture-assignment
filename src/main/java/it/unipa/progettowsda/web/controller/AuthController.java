@@ -17,13 +17,13 @@ public class AuthController {
         this.utenteService = utenteService;
     }
 
-    // 1. Mostra il form vuoto
+    // Mostra il form vuoto
     @GetMapping("/login")
     public String login() {
         return "public/login";
     }
 
-    // 2. Mostra il form di registrazione
+    // Mostra il form di registrazione
     @GetMapping("/register")
     public String register(Model model) {
         // Passiamo un DTO vuoto all'HTML per "ospitare" i dati
@@ -31,7 +31,7 @@ public class AuthController {
         return "public/register";
     }
 
-    // 3. Riceve i dati, li VALIDA e prova a salvare
+    //  Riceve i dati, li VALIDA e prova a salvare
     @PostMapping("/register")
     public String doRegister(
             @Valid @ModelAttribute("form") RegistrazioneForm form, // @Valid per fare tutti i controlli definiti nel form DTO
@@ -57,7 +57,6 @@ public class AuthController {
             return "redirect:/login?registered";
 
         } catch (RuntimeException e) {
-            // PASSO C: Gestione errore "Business" (es. Email già usata nel DB)
             // Questo errore non viene catturato da @Valid perché richiede una query al DB.
             // Lo aggiungiamo manualmente agli errori globali.
             model.addAttribute("errorMessage", e.getMessage());

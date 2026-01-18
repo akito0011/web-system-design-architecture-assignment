@@ -14,7 +14,7 @@ public class Camera {
     @Column(name = "id_camera")
     private Integer id;
 
-    // Relazione Many-to-One: Molte camere stanno in una Struttura
+    // Relazione Many-to-One:molte camere stanno in una Struttura
     @ManyToOne(optional = false)
     @JoinColumn(name = "id_struttura", nullable = false)
     private Struttura struttura;
@@ -42,7 +42,6 @@ public class Camera {
     @OneToMany(mappedBy = "camera", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Termostato> termostati = new ArrayList<>();
 
-    // --- COSTRUTTORI ---
 
     public Camera() {
     }
@@ -54,8 +53,7 @@ public class Camera {
         this.prezzoBase = prezzoBase;
     }
 
-    // --- GETTER E SETTER ---
-    // (Niente setId)
+    //GETTER E SETTER
 
     public Integer getId() { return id; }
 

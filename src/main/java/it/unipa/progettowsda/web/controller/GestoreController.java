@@ -26,8 +26,8 @@ public class GestoreController {
     private final StaffService staffService;
 
     public GestoreController(PrenotazioneService prenotazioneService,
-                             UtenteService utenteService,
-                             StaffService staffService) {
+            UtenteService utenteService,
+            StaffService staffService) {
         this.prenotazioneService = prenotazioneService;
         this.utenteService = utenteService;
         this.staffService = staffService;
@@ -132,10 +132,21 @@ public class GestoreController {
         }
     }
 
-    @GetMapping("/download-report")
-    public ResponseEntity<String> downloadReportXml() {
-        String xmlContent = prenotazioneService.generaReportXmlGiornaliero();
-        String filename = "report_prenotazioni_" + LocalDate.now() + ".xml";
+    @GetMapping("/download-report-questura")
+    public ResponseEntity<String> downloadReportQuestura() {
+        String xmlContent = prenotazioneService.generaReportQuestura();
+        String filename = "report_questura_" + LocalDate.now() + ".xml";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .contentType(MediaType.APPLICATION_XML)
+                .body(xmlContent);
+    }
+
+    @GetMapping("/download-report-tassa")
+    public ResponseEntity<String> downloadReportTassaSoggiorno() {
+        String xmlContent = prenotazioneService.generaReportTassaSoggiorno();
+        String filename = "report_tassa_soggiorno_" + LocalDate.now() + ".xml";
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)

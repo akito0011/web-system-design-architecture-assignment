@@ -3,7 +3,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "StoricoPulizie") // O "StoricoPulizie" a seconda del DB (su Windows è case-insensitive, su Linux/Mac no)
+@Table(name = "StoricoPulizie")
 public class StoricoPulizie {
 
     @Id

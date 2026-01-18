@@ -11,14 +11,11 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-    // 1. DICHIARIAMO LA VARIABILE QUI
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
-
-    // 2. LA INIETTIAMO TRAMITE IL COSTRUTTORE
     public SecurityConfig(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler) {
         this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
     }
-
+    //bean serve a dichiarrae un metodo che ritorna un oggetto che verrà instanziato automaticamente (Senza esplicitare new)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -33,7 +30,7 @@ public class SecurityConfig {
                         // Rotte per l'Admin
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
 
-                        // Rotte per lo Staff (AGGIUNTO)
+                        // Rotte per lo Staff
                         .requestMatchers("/staff/**").hasAuthority("ROLE_STAFF")
 
                         // Rotte per il Cliente
@@ -43,7 +40,6 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        // 3. ORA QUESTA VARIABILE NON SARÀ PIÙ ROSSA
                         .successHandler(customAuthenticationSuccessHandler)
                         .permitAll()
                 )

@@ -21,7 +21,6 @@ public class DomoticaService {
     private final CameraRepository cameraRepo;
     private final PrenotazioneRepository prenotazioneRepo; // Aggiunto per risolvere il problema dell'ID
 
-    // Constructor Injection (Niente Autowired)
     public DomoticaService(LuceRepository luceRepo, TapparellaRepository tapparellaRepo,
                            TermostatoRepository termostatoRepo, CameraRepository cameraRepo,
                            PrenotazioneRepository prenotazioneRepo) {
@@ -31,8 +30,6 @@ public class DomoticaService {
         this.cameraRepo = cameraRepo;
         this.prenotazioneRepo = prenotazioneRepo;
     }
-
-    // --- METODI PER RISOLVERE L'ID PRENOTAZIONE ---
 
     private Camera getCameraDaPrenotazione(Integer idPrenotazione) {
         Prenotazione p = prenotazioneRepo.findById(idPrenotazione)
@@ -58,7 +55,7 @@ public class DomoticaService {
                 .orElseThrow(() -> new EntityNotFoundException("Nessun termostato nella camera " + camera.getId()));
     }
 
-    // --- LETTURA DISPOSITIVI (METODI ESISTENTI) ---
+    // --- LETTURA DISPOSITIVI
     public List<Luce> getLuci(Integer idCamera) {
         return luceRepo.findByCameraId(idCamera);
     }
@@ -71,7 +68,7 @@ public class DomoticaService {
         return termostatoRepo.findByCameraId(idCamera).stream().findFirst().orElse(null);
     }
 
-    // --- AZIONI (MODIFICA STATO) ---
+    // --- AZIONI MODIFICA STATO
 
     @Transactional
     public void switchLuce(Integer idLuce) {

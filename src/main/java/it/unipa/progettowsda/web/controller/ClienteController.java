@@ -32,7 +32,6 @@ public class ClienteController {
         this.utenteService = utenteService;
     }
 
-    // [METODO DASHBOARD INVARIATO...]
     @GetMapping("/dashboard")
     public String dashboard(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         Utente utente = utenteService.findByEmail(userDetails.getUsername());
@@ -65,7 +64,7 @@ public class ClienteController {
 
     // GESTIONE CHECK-IN
 
-    // 1. GET: Mostra la pagina con il form pre-generato
+    //  GET: Mostra la pagina con il form pre-generato
     @GetMapping("/checkin/{id}")
     public String mostraCheckIn(@PathVariable Integer id,
                                 @AuthenticationPrincipal UserDetails userDetails,
@@ -103,25 +102,25 @@ public class ClienteController {
         return "cliente/checkin";
     }
 
-    // 2. POST: Riceve i dati, valida e salva
+    // POST: Riceve i dati, valida e salva
     @PostMapping("/conferma-checkin")
     public String salvaCheckIn(
             @Valid @ModelAttribute("checkInForm") CheckInForm form, // @Valid triggera il controllo su OspiteForm.dataNascita
             BindingResult result,
             Model model) {
 
-        // A. Recuperiamo la prenotazione per confrontare i dati
+        //  Recuperiamo la prenotazione per confrontare i dati
         Prenotazione prenotazione = prenotazioneService.findById(form.getIdPrenotazione());
 
-        // B. Validazione errori standard (campi vuoti, date nulle)
+        //  Validazione errori standard (campi vuoti, date nulle)
         if (result.hasErrors()) {
             model.addAttribute("prenotazione", prenotazione);
             return "cliente/checkin";
         }
 
-        // C. VALIDAZIONE DOCUMENTI CAPOGRUPPO
+        //  VALIDAZIONE DOCUMENTI CAPOGRUPPO
         if (!form.getOspiti().isEmpty()) {
-            OspiteForm capogruppo = form.getOspiti().get(0); // get(0) è sicuro qui perché la lista non è vuota
+            OspiteForm capogruppo = form.getOspiti().getFirst();
 
             if (capogruppo.getTipoDoc() == null) {
                 result.rejectValue("ospiti[0].tipoDoc", "error.doc", "Il tipo di documento è obbligatorio per il capogruppo");
@@ -131,7 +130,7 @@ public class ClienteController {
             }
         }
 
-        // D. VALIDAZIONE ESENZIONI TASSA DI SOGGIORNO
+        //  VALIDAZIONE ESENZIONI TASSA DI SOGGIORNO
         int esenzioniDichiarate = prenotazione.getNumOspitiEsentiDichiarati();
 
         if (esenzioniDichiarate > 0) {
@@ -158,19 +157,19 @@ public class ClienteController {
             }
         }
 
-        // E. RICARICA PAGINA SE CI SONO STATI ERRORI DI LOGICA (Doc o Esenzioni)
+        //  RICARICA PAGINA SE CI SONO STATI ERRORI DI LOGICA (Doc o Esenzioni)
         if (result.hasErrors()) {
             model.addAttribute("prenotazione", prenotazione);
             return "cliente/checkin";
         }
 
-        // F. TUTTO OK -> SALVA (Il service farà il ricalcolo prezzo in base alle date nascita se necessario)
+        //  TUTTO OK -> SALVA (Il service farà il ricalcolo prezzo in base alle date nascita se necessario)
         prenotazioneService.eseguiCheckIn(form.getIdPrenotazione(), form.getOspiti());
 
         return "redirect:/cliente/dashboard?success=CheckInEffettuato";
     }
 
-    // [ALTRI METODI CHECK-OUT E NOTE INVARIATI...]
+    // ALTRI METODI CHECK-OUT E NOTE
     @GetMapping("/checkout/{id}")
     public String mostraPaginaCheckout(@PathVariable Integer id,
                                        @AuthenticationPrincipal UserDetails userDetails,

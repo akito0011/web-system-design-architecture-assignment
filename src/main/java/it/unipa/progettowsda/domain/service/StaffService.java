@@ -33,14 +33,13 @@ public class StaffService {
         return cameraRepo.findByStato(StatoCamera.DA_PULIRE);
     }
 
-    // NUOVO METODO per recuperare lo storico
     public List<StoricoPulizie> getStoricoCompleto() {
         return storicoRepo.findAll(Sort.by(Sort.Direction.DESC, "dataOra"));
     }
 
     @Transactional
     public void segnaCameraComePulita(Integer idCamera, Integer idStaff) {
-        // --- STAMPE DI DEBUG ---
+        // --- PRINT DI DEBUG ---
         System.out.println("DEBUG: Inizio pulizia");
         System.out.println("DEBUG: Parametro idCamera ricevuto: " + idCamera);
         System.out.println("DEBUG: Parametro idStaff ricevuto: " + idStaff);
@@ -52,7 +51,7 @@ public class StaffService {
         Utente staff = utenteRepo.findById(idStaff)
                 .orElseThrow(() -> new RuntimeException("Utente staff non trovato ID: " + idStaff));
 
-        // --- ALTRE STAMPE ---
+        // --- IDEM QUA ---
         System.out.println("DEBUG: Trovata Camera: " + c.getNumero() + " (ID Reale: " + c.getId() + ")");
         System.out.println("DEBUG: Trovato Staff: " + staff.getNome() + " (ID Reale: " + staff.getId() + ")");
         // --------------------

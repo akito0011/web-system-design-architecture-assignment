@@ -22,7 +22,6 @@ public class DomoticaController {
     }
 
     // --- VISTA PRINCIPALE (GET) ---
-    // URL: localhost:8080/cliente/domotica/8 (dove 8 è l'ID PRENOTAZIONE)
     @GetMapping("/{id}")
     public String dashboard(@PathVariable("id") Integer idPrenotazione, Model model) {
         model.addAttribute("idPrenotazione", idPrenotazione);
@@ -60,10 +59,10 @@ public class DomoticaController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            // 1. Recupero l'oggetto Tapparella corretto tramite la prenotazione
+            //  Recupero l'oggetto Tapparella corretto tramite la prenotazione
             Tapparella t = domoticaService.getTapparellaByPrenotazioneId(idPrenotazione);
 
-            // 2. Eseguo l'azione usando l'ID reale della tapparella
+            //  Eseguo l'azione usando l'ID reale della tapparella
             domoticaService.regolaTapparella(t.getId(), azione);
 
         } catch (Exception e) {
@@ -80,10 +79,10 @@ public class DomoticaController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            // 1. Recupero il Termostato corretto
+            //  Recupero il Termostato corretto
             Termostato t = domoticaService.getTermostatoByPrenotazioneId(idPrenotazione);
 
-            // 2. Eseguo l'azione usando l'ID reale del termostato
+            //  Eseguo l'azione usando l'ID reale del termostato
             domoticaService.regolaTemperatura(t.getId(), azione);
 
         } catch (IllegalStateException e) {
@@ -102,10 +101,10 @@ public class DomoticaController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            // 1. Recupero il Termostato corretto
+            //  Recupero il Termostato corretto
             Termostato t = domoticaService.getTermostatoByPrenotazioneId(idPrenotazione);
 
-            // 2. Cambio modalità usando l'ID reale del termostato
+            //  Cambio modalità usando l'ID reale del termostato
             domoticaService.cambiaModalita(t.getId(), modalita);
 
         } catch (Exception e) {

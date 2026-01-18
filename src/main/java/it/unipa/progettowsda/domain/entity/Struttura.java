@@ -35,8 +35,6 @@ public class Struttura {
     private Set<Servizio> serviziDisponibili = new HashSet<>();
 
 
-    // --- Costruttori, Getter e Setter ---
-
     public Struttura() {}
 
     public Struttura(String nome, String indirizzo, String citta) {
@@ -56,7 +54,6 @@ public class Struttura {
     public String getNome() { return nome;}
     public void setNome(String nome) { this.nome = nome;}
 
-    //faccio anche per serviziDisponibili
     public Set<Servizio> getServiziDisponibili() { return serviziDisponibili; }
     public void setServiziDisponibili(Set<Servizio> serviziDisponibili) { this.serviziDisponibili = serviziDisponibili; }
 
